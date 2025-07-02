@@ -105,8 +105,6 @@ export default function AddUserPage() {
         setServerMessages({ msgs: [data.error || "Сталася помилка"], type: "error" });
       } else {
         setServerMessages({ msgs: ["Користувача успішно додано!"], type: "success" });
-
-        // Очистка форми
         nameRef.current!.value = "";
         phoneRef.current!.value = "";
         passwordRef.current!.value = "";
