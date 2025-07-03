@@ -2,6 +2,7 @@ import { NextAuthOptions, RequestInternal } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prismaClient";
 import bcrypt from "bcryptjs";
+import { use } from "react";
 
 
 const authOptions: NextAuthOptions = {
@@ -50,6 +51,7 @@ const authOptions: NextAuthOptions = {
     name: user.name,
     phone: user.phone,
     email: null,
+    role: user.role
   };
 },
     }),
@@ -60,6 +62,7 @@ const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.phone = user.phone;
         token.name = user.name;
+        token.role=user.role;
       }
       console.log("JWT callback token:", token);
       return token;
@@ -69,6 +72,7 @@ const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.phone = token.phone as string;
         session.user.name = token.name as string;
+        session.user.role = token.role as string
       }
       console.log("Session callback session:", session);
       return session;

@@ -9,7 +9,6 @@ import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const session = useSession();
   const LoginSchema = z.object({
     phone: z
       .string()
@@ -79,7 +78,9 @@ export default function LoginPage() {
       setServerMessages({ msgs: ["Невірний телефон або пароль"], type: "error" });
     } else if (res?.ok) {
       setServerMessages({ msgs: ["Успішний вхід!"], type: "success" });
-      router.push("/");
+      const session = useSession()
+      session?.data?.user?.role === "ACCOUNTANT" ? router.push("/accountant/dashboard"):router.push("/");
+      session?.data?.user?.role === "ADMIN" ? router.push("/admin"):router.push("/");
     }
   } catch (error) {
     setServerMessages({ msgs: ["Помилка мережі або сервера"], type: "error" });

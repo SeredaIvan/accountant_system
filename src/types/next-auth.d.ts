@@ -5,6 +5,7 @@ declare module "next-auth" {
     id: string;
     name?: string | null;
     phone?: string | null;
+    role?: string | null;
   }
 
   interface Session {
@@ -12,6 +13,7 @@ declare module "next-auth" {
       id: string;
       name?: string | null;
       phone?: string | null;
+      role?: string | null;
     };
   }
 }
@@ -21,5 +23,6 @@ declare module "next-auth/jwt" {
     id: string;
     name?: string | null;
     phone?: string | null;
+    role?: string | null;
   }
 }
