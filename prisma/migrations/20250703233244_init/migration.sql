@@ -1,0 +1,34 @@
+-- AlterTable
+ALTER TABLE "Dish" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+-- CreateTable
+CREATE TABLE "Day" (
+    "id" TEXT NOT NULL,
+    "date" TIMESTAMP(3) NOT NULL,
+    "countKids" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Day_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "_DishDays" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_DishDays_AB_pkey" PRIMARY KEY ("A","B")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Day_date_key" ON "Day"("date");
+
+-- CreateIndex
+CREATE INDEX "_DishDays_B_index" ON "_DishDays"("B");
+
+-- AddForeignKey
+ALTER TABLE "_DishDays" ADD CONSTRAINT "_DishDays_A_fkey" FOREIGN KEY ("A") REFERENCES "Day"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "_DishDays" ADD CONSTRAINT "_DishDays_B_fkey" FOREIGN KEY ("B") REFERENCES "Dish"("id") ON DELETE CASCADE ON UPDATE CASCADE;
