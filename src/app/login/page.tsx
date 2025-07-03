@@ -4,10 +4,12 @@ import { useRef, useState } from "react";
 import * as z from "zod/v4";
 import { MessageBox } from "@/components/MessageBox";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
   const router = useRouter();
-
+  const session = useSession();
   const LoginSchema = z.object({
     phone: z
       .string()
@@ -37,54 +39,52 @@ export default function LoginPage() {
   };
 
   const submitData = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    resetErrors();
+  resetErrors();
 
-    const phone = phoneRef.current?.value || "";
-    const password = passwordRef.current?.value || "";
+  const phone = phoneRef.current?.value || "";
+  const password = passwordRef.current?.value || "";
 
-    const result = LoginSchema.safeParse({ phone, password });
+  const result = LoginSchema.safeParse({ phone, password });
 
-    if (!result.success) {
-      const errors = result.error.flatten().fieldErrors;
-      const errorMessages = Object.values(errors).flatMap((arr) => arr || []);
-      setFormErrors(errorMessages);
+  if (!result.success) {
+    const errors = result.error.flatten().fieldErrors;
+    const errorMessages = Object.values(errors).flatMap((arr) => arr || []);
+    setFormErrors(errorMessages);
 
-      if (errors.phone) {
-        labelPhoneRef.current?.classList.add("text-red-500");
-        phoneRef.current?.classList.add("border-red-500");
-        labelPhoneRef.current!.textContent = errors.phone[0]!;
-      }
-
-      if (errors.password) {
-        labelPassRef.current?.classList.add("text-red-500");
-        passwordRef.current?.classList.add("border-red-500");
-        labelPassRef.current!.textContent = errors.password[0]!;
-      }
-
-      return;
+    if (errors.phone) {
+      labelPhoneRef.current?.classList.add("text-red-500");
+      phoneRef.current?.classList.add("border-red-500");
+      labelPhoneRef.current!.textContent = errors.phone[0]!;
     }
 
-    try {
-      const res = await fetch("/api/v1.0/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        setServerMessages({ msgs: [data.error || "Сталася помилка сервера"], type: "error" });
-      } else {
-        setServerMessages({ msgs: ["Успішний вхід!"], type: "success" });
-        router.push("/");
-      }
-    } catch (error) {
-      setServerMessages({ msgs: ["Помилка мережі або сервера"], type: "error" });
+    if (errors.password) {
+      labelPassRef.current?.classList.add("text-red-500");
+      passwordRef.current?.classList.add("border-red-500");
+      labelPassRef.current!.textContent = errors.password[0]!;
     }
-  };
+
+    return;
+  }
+
+  try {
+    const res = await signIn("credentials", {
+      phone,
+      password,
+      redirect: false,
+    });
+
+    if (res?.error) {
+      setServerMessages({ msgs: ["Невірний телефон або пароль"], type: "error" });
+    } else if (res?.ok) {
+      setServerMessages({ msgs: ["Успішний вхід!"], type: "success" });
+      router.push("/");
+    }
+  } catch (error) {
+    setServerMessages({ msgs: ["Помилка мережі або сервера"], type: "error" });
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
