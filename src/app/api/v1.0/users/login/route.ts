@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prismaClient";
 import { User } from "@/generated/prisma";
 import jwt from "jsonwebtoken";
 import dotenv from 'dotenv';
+import { serialize } from "cookie";
 dotenv.config();
 
 export async function POST(req: NextRequest) {
@@ -36,7 +37,19 @@ export async function POST(req: NextRequest) {
 
     const token = jwt.sign({ ...userWithoutPass }, secret, { expiresIn: "1d" });
 
-    return NextResponse.json({ message: "Успішний вхід", token });
+    const response = NextResponse.json({ message: "Успішний вхід" });
+
+    response.headers.set(
+      "Set-Cookie",
+      serialize("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        path: "/",
+        maxAge: 60 * 60 * 24, 
+      })
+    );
+
+return response;
   } catch (error) {
     console.error("Помилка при логіні:", error);
     return NextResponse.json({ error: "Внутрішня помилка сервера" }, { status: 500 });

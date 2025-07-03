@@ -12,6 +12,7 @@ export function middleware(req: NextRequest) {
   }
 
   const token = req.cookies.get("token")?.value;
+  console.log("Token in middleware:", token);
 
   if (!token) {
     return pathname.startsWith("/api")
@@ -22,7 +23,7 @@ export function middleware(req: NextRequest) {
   try {
     const decoded = verify(token, process.env.JWT_SECRET!) as any;
     const role = decoded.role;
-
+    console.log(decoded)
     if (pathname.startsWith("/api")) {
       if (API_PROTECTED.includes(pathname) && role !== "ADMIN") {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -31,6 +32,9 @@ export function middleware(req: NextRequest) {
     }
 
     if (pathname.startsWith("/admin") && role !== "ADMIN") {
+      return NextResponse.redirect(new URL("/403", req.url));
+    }
+    if (pathname.startsWith("/accountant") && role !== "ACCOUNTANT") {
       return NextResponse.redirect(new URL("/403", req.url));
     }
 

@@ -97,6 +97,7 @@ export default function AddUserPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone, password, role }),
+        credentials: "include", 
       });
 
       const data = await res.json();
