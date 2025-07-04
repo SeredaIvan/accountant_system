@@ -34,7 +34,7 @@ export async function PATCH(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { date, countKids, dishes }: Omit<DayPatchPayload, "id"> = body;
-
+  console.log(date)
   try {
     const dayData = await prisma.day.create({
       data: {

@@ -1,7 +1,8 @@
 "use client";
+import { DayForm } from "@/components/DayForm";
 import { MessageBox } from "@/components/MessageBox";
 import { DaysTabBar } from "@/components/TabBar";
-import { Day } from "@/generated/prisma";
+import { Day, Dish } from "@/generated/prisma";
 import { useEffect, useState } from "react";
 
 interface DayTab {
@@ -10,29 +11,41 @@ interface DayTab {
   content: string;
 }
 
+interface DayWithDishes extends Day {
+  dishes: Dish[];
+}
+
+
 const DashboardPage = () => {
   const [errors, setErrors] = useState<string[] | null>(null);
-  const [dayData, setDayData] = useState<Day | null>(null);
+  const [dayData, setDayData] = useState<DayWithDishes | null>(null);
   const [loading ,setLoading] = useState<boolean>(false)
-  
+  const [dishes, setDishes] = useState<Dish[]>([]);
 
   const today = new Date();
-    const [activeTab, setActiveTab] = useState<number>(today.getDate());
-  function normalizeErrors(err: unknown): string[] {
-    if (Array.isArray(err)) {
-      return err.map(e => (typeof e === "string" ? e : JSON.stringify(e)));
-    }
-    if (typeof err === "string") {
-      return [err];
-    }
-    try {
-      return [JSON.stringify(err)];
-    } catch {
-      return ["Unknown error"];
-    }
-  }
+  const [activeTab, setActiveTab] = useState<number>(today.getDate());
 
-  async function getDayInfo(day: number, month: number, year: number): Promise<Day | null> {
+  async function getDishes() {
+  try {
+    const res = await fetch("/api/v1.0/dishes/get-all", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      setDishes(data.dishes || []);
+    } else {
+      setErrors(["Помилка отримання страв"]);
+    }
+  } catch (error) {
+    console.log(error);
+    setErrors(["Несподівана помилка при завантаженні страв"]);
+  }
+}
+
+
+  async function getDayInfo(day: number, month: number, year: number): Promise<DayWithDishes | null> {
+
   setErrors(null);
   try {
     const res = await fetch(`/api/v1.0/days/${day}-${month}-${year}`, {
@@ -41,6 +54,7 @@ const DashboardPage = () => {
     });
     
     if (!res.ok) {
+
       const result = await fetch("/api/v1.0/days", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,8 +78,6 @@ const DashboardPage = () => {
 
     if (data.error) {
       setErrors(normalizeErrors(data.error));
-      console.log("РОбимо інсерт")
-      
     }
     return data.dayData ?? null;
   } catch (e) {
@@ -73,12 +85,47 @@ const DashboardPage = () => {
     return null;
   }
 }
+  const daysArr: DayTab[] = getArrayOfDays();
 
+  useEffect(() => {
+    async function fetchDay() {
+      setLoading(true);
+      const data = await getDayInfo(activeTab+1, today.getMonth() + 1, today.getFullYear());
+      setDayData(data);
+      setLoading(false);
+    }
+    fetchDay();
+  }, [activeTab]);
 
-  function daysInMonth(year: number, month: number): number {
-    return new Date(year, month + 1, 0).getDate();
-  }
+  useEffect(() => {
+    async function fetchDishes() {
+      await getDishes();
+    }
+    fetchDishes();
+  },[]);
 
+  useEffect(() => {
+
+  }, [dishes]);
+
+  return (
+    <div>
+      <DaysTabBar tabs={daysArr} activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {errors && <MessageBox messages={errors} type="error" />}
+
+      {/* Вміст активної вкладки */}
+        {loading ? (
+          <p>Завантаження...</p>
+        ) : dayData&&dishes ? (
+          <div>
+            <DayForm dayData={dayData} dishes={dishes} />
+          </div>
+        ) : (
+          daysArr.find(tab => tab.id === activeTab)?.content
+        )}
+    </div>
+  );
   function getArrayOfDays() {
     const days = daysInMonth(today.getFullYear(), today.getMonth());
     return Array.from({ length: days }, (_, i) => ({
@@ -87,40 +134,24 @@ const DashboardPage = () => {
       content: `Вміст для дня ${i + 1}`,
     }));
   }
-
-  const daysArr: DayTab[] = getArrayOfDays();
-
-  useEffect(() => {
-    async function fetchDay() {
-      setLoading(true);
-      const data = await getDayInfo(activeTab, today.getMonth() + 1, today.getFullYear());
-      setDayData(data);
-      setLoading(false);
+    function normalizeErrors(err: unknown): string[] {
+    if (Array.isArray(err)) {
+      return err.map(e => (typeof e === "string" ? e : JSON.stringify(e)));
     }
-    fetchDay();
-  }, [activeTab]);
+    if (typeof err === "string") {
+      return [err];
+    }
+    try {
+      return [JSON.stringify(err)];
+    } catch {
+      return ["Unknown error"];
+    }
+  }
 
-  return (
-    <div>
-      <h1>Бухгалтерська панель</h1>
-      <DaysTabBar tabs={daysArr} activeTab={activeTab} setActiveTab={setActiveTab} />
-
-      {errors && <MessageBox messages={errors} type="error" />}
-
-      {/* Вміст активної вкладки */}
-        {loading ? (
-          <p>Завантаження...</p>
-        ) : dayData ? (
-          <div>
-            <p>Дата: {new Date(dayData.date).toLocaleDateString()}</p>
-            <p>Кількість дітей: {dayData.countKids}</p>
-            {/* Інші поля */}
-          </div>
-        ) : (
-          daysArr.find(tab => tab.id === activeTab)?.content
-        )}
-    </div>
-  );
+  function daysInMonth(year: number, month: number): number {
+    return new Date(year, month + 1, 0).getDate();
+  }
+  
 };
 
 export default DashboardPage;

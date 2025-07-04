@@ -11,6 +11,7 @@ export async function GET(
 
   const [day, month, year] = datetime.split("-").map(Number);
   
+  
   if (!day || !month || !year) {
     return NextResponse.json({ error: "Невірна дата" }, { status: 400 });
   }
