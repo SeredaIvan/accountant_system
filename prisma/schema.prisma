@@ -29,16 +29,33 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
-
 model Dish {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  product   String
-  weight    Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now())
+  id        String        @id @default(cuid())
+  name      String        @unique
+  products  DishProduct[] 
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  days      Day[]         @relation("DishDays")
+}
 
-  days      Day[]    @relation("DishDays")
+model Product {
+  id        String        @id @default(cuid())
+  name      String        @unique
+  dishes    DishProduct[] 
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model DishProduct {
+  id         String   @id @default(cuid())
+  dish       Dish     @relation(fields: [dishId], references: [id])
+  dishId     String
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  String
+
+  weight     Float    
+
+  @@unique([dishId, productId]) 
 }
 
 model Day {
@@ -47,7 +64,7 @@ model Day {
   countKids Int
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now())
+  updatedAt DateTime @updatedAt
 
   dishes    Dish[]   @relation("DishDays")
 }
