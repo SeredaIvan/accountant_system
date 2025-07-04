@@ -54,7 +54,7 @@ export function DayForm({ dayData, dishes }: DayFormProps) {
   const availableDishes = dishes.filter(
     (d) => !truthDishes.find((td) => td.id === d.id)
   );
-
+  console.log(dayData.date)
   return (
     <div className="max-w-lg mx-auto p-4 bg-white rounded-md shadow-md">
     <p className="mb-4 text-lg font-semibold text-gray-700">
