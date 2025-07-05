@@ -1,65 +1,50 @@
-import { Day, Dish } from "@/generated/prisma";
 import { useEffect, useState } from "react";
 import { DishTile } from "./DishTile";
+import { useDishesStore } from "@/stores/dishesStore";
+import { useDaysStore } from "@/stores/daysStore";
+import { Dish } from "@/generated/prisma";
+import { DayWithFullDishes } from "@/types/DayWithFullDishes";
+import { DishWithProducts } from "@/types/DishWithProducts";
 
-interface DayWithDishes extends Day {
-  dishes: Dish[];
-}
+export function DayForm() {
+  const dayData:DayWithFullDishes|null = useDaysStore((state) => state.days);
+  const setDayData = useDaysStore((state) => state.setDays);
 
-interface DishWithComputedWeight extends Dish {
-  computedWeight?: number;
-}
+  const dishes:DishWithProducts[] = useDishesStore((state) => state.dishes);
+  const setDishes = useDishesStore((state) => state.setDishes);
 
-interface DayFormProps {
-  dayData: DayWithDishes;
-  dishes: Dish[];
-}
-
-export function DayForm({ dayData, dishes }: DayFormProps) {
-  const [countKids, setCountKids] = useState<number>(dayData.countKids || 0);
-  const [truthDishes, setTruthDishes] = useState<DishWithComputedWeight[]>([]);
+  const [countKids, setCountKids] = useState<number>(dayData?.countKids || 0);
   const [selectedDishId, setSelectedDishId] = useState<string>("");
+  const [selectedDishes, setSelectedDishes] = useState<Dish[]>([]);
 
   useEffect(() => {
-    const initialDishes = (dayData.dishes || []).map((d) => ({
-      ...d,
-      computedWeight: d.weight * countKids,
-    }));
-    setTruthDishes(initialDishes);
-    setCountKids(dayData.countKids || 0);
+    if (dayData) {
+      setCountKids(dayData.countKids || 0);
+      setSelectedDishes(dayData.dishes || []);
+    }
   }, [dayData]);
 
-  useEffect(() => {
-    setTruthDishes((prev) =>
-      prev.map((dish) => ({
-        ...dish,
-        computedWeight: dish.weight * countKids,
-      }))
-    );
-  }, [countKids]);
-
-  function handleSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
-    setSelectedDishId(selectedId);
     const selectedDish = dishes.find((d) => d.id === selectedId);
-    if (selectedDish && !truthDishes.find((d) => d.id === selectedDish.id)) {
-      setTruthDishes((prev) => [
-        ...prev,
-        { ...selectedDish, computedWeight: selectedDish.weight * countKids },
-      ]);
-      setSelectedDishId("");
+    if (selectedDish && !selectedDishes.find((d) => d.id === selectedDish.id)) {
+      setSelectedDishes((prev) => [...prev, selectedDish]);
     }
-  }
+    setSelectedDishId("");
+  };
 
   const availableDishes = dishes.filter(
-    (d) => !truthDishes.find((td) => td.id === d.id)
+    (d) => !selectedDishes.find((sd) => sd.id === d.id)
   );
-  console.log(dayData.date)
+
+  if (!dayData) return null;
+
   return (
     <div className="max-w-lg mx-auto p-4 bg-white rounded-md shadow-md">
-    <p className="mb-4 text-lg font-semibold text-gray-700">
-      Дата: {formatDateToDMY(new Date(dayData.date))}
-    </p>
+      <p className="mb-4 text-lg font-semibold text-gray-700">
+        Дата: {formatDateToDMY(new Date(dayData.date))}
+      </p>
+
       <label htmlFor="countKids" className="block mb-1 font-medium text-gray-600">
         Кількість дітей:
       </label>
@@ -89,7 +74,7 @@ export function DayForm({ dayData, dishes }: DayFormProps) {
           </option>
           {availableDishes.map((dish) => (
             <option key={dish.id} value={dish.id}>
-              {dish.name} ({dish.product}) - {dish.weight} г
+              {dish.name}
             </option>
           ))}
         </select>
@@ -98,16 +83,17 @@ export function DayForm({ dayData, dishes }: DayFormProps) {
       <div>
         <h3 className="mb-2 text-xl font-semibold text-gray-700">Обрані страви:</h3>
         <div className="border rounded-md divide-y divide-gray-200 overflow-hidden shadow-sm">
-          {truthDishes.length === 0 && (
+          {selectedDishes.length === 0 && (
             <p className="p-4 text-gray-500 text-center">Страви не обрано</p>
           )}
-          {truthDishes.map((dish) => (
+          {selectedDishes.map((dish) => (
             <DishTile key={dish.id} dish={dish} />
           ))}
         </div>
       </div>
     </div>
   );
+
   function formatDateToDMY(dateInput: string | Date): string {
     const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
     const day = d.getUTCDate().toString().padStart(2, "0");
@@ -115,5 +101,4 @@ export function DayForm({ dayData, dishes }: DayFormProps) {
     const year = d.getUTCFullYear();
     return `${day}-${month}-${year}`;
   }
-
 }

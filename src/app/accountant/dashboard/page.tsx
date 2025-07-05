@@ -2,8 +2,11 @@
 import { DayForm } from "@/components/DayForm";
 import { MessageBox } from "@/components/MessageBox";
 import { DaysTabBar } from "@/components/TabBar";
-import { Day, Dish } from "@/generated/prisma";
+import { Day, Dish, DishProduct, Product } from "@/generated/prisma";
+import { DayWithFullDishes } from "@/types/DayWithFullDishes";
 import { useEffect, useState } from "react";
+import { useDishesStore } from "@/stores/dishesStore";
+import { useDaysStore } from "@/stores/daysStore";
 
 interface DayTab {
   id: number;
@@ -11,16 +14,15 @@ interface DayTab {
   content: string;
 }
 
-interface DayWithDishes extends Day {
-  dishes: Dish[];
-}
-
-
 const DashboardPage = () => {
   const [errors, setErrors] = useState<string[] | null>(null);
-  const [dayData, setDayData] = useState<DayWithDishes | null>(null);
   const [loading ,setLoading] = useState<boolean>(false)
-  const [dishes, setDishes] = useState<Dish[]>([]);
+  
+  const dayData = useDaysStore((state)=>state.days)
+  const setDayData = useDaysStore((state)=>state.setDays)
+  
+  const dishes = useDishesStore((state)=>state.dishes)
+  const setDishes = useDishesStore((state)=>state.setDishes)
 
   const today = new Date();
   const [activeTab, setActiveTab] = useState<number>(today.getDate());
@@ -44,7 +46,7 @@ const DashboardPage = () => {
 }
 
 
-  async function getDayInfo(day: number, month: number, year: number): Promise<DayWithDishes | null> {
+  async function getDayInfo(day: number, month: number, year: number): Promise<DayWithFullDishes | null> {
 
   setErrors(null);
   try {
@@ -90,9 +92,11 @@ const DashboardPage = () => {
   useEffect(() => {
     async function fetchDay() {
       setLoading(true);
-      const data = await getDayInfo(activeTab+1, today.getMonth() + 1, today.getFullYear());
-      setDayData(data);
-      setLoading(false);
+      const data:DayWithFullDishes|null= await getDayInfo(activeTab+1, today.getMonth() + 1, today.getFullYear());
+      if(data){
+        setDayData(data);
+        setLoading(false);
+      }
     }
     fetchDay();
   }, [activeTab]);
@@ -105,8 +109,11 @@ const DashboardPage = () => {
   },[]);
 
   useEffect(() => {
-
+    console.log(dishes)
   }, [dishes]);
+    useEffect(() => {
+    console.log(dayData)
+  }, [dayData]);
 
   return (
     <div>
@@ -119,7 +126,7 @@ const DashboardPage = () => {
           <p>Завантаження...</p>
         ) : dayData&&dishes ? (
           <div>
-            <DayForm dayData={dayData} dishes={dishes} />
+            <DayForm />
           </div>
         ) : (
           daysArr.find(tab => tab.id === activeTab)?.content

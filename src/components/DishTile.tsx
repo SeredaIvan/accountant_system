@@ -1,10 +1,10 @@
-import { Dish } from "@/generated/prisma";
 
-interface DishWithComputedWeight extends Dish {
-  computedWeight?: number;
-}
+import { DishWithProducts } from "@/types/DishWithProducts";
 
-export function DishTile({ dish }: { dish: DishWithComputedWeight }) {
+
+
+
+export function DishTile({ dish }: { dish: DishWithProducts }) {
   return (
     <div className="flex justify-between items-center bg-white px-4 py-3 hover:bg-gray-50">
       <span className="w-1/3 font-medium text-gray-800">{dish.name}</span>
