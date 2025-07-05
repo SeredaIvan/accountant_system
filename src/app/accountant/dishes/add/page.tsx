@@ -1,17 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import { MessageBox } from "@/components/MessageBox";
+import SelectedProducts from "@/components/SelectedProducts";
 
 type Product = {
   id: string;
   name: string;
 };
 
-type SelectedProduct = {
-  productId: string;
-  name: string;
-  weight: number | "";
-};
 
 const DishesAdd = () => {
   const [name, setName] = useState("");
@@ -161,32 +157,12 @@ const DishesAdd = () => {
         </div>
 
         {selectedProducts.length > 0 && (
-          <div>
-            <h2 className="font-semibold text-lg mb-2 mt-4">Обрані продукти:</h2>
-            <ul className="space-y-3">
-              {selectedProducts.map((p) => (
-                <li key={p.productId} className="flex items-center gap-3">
-                  <span className="flex-1">{p.name}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    placeholder="Вага (г)"
-                    className="w-24 px-2 py-1 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={p.weight === "" ? "" : p.weight}
-                    onChange={(e) => updateWeight(p.productId, Number(e.target.value))}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeProduct(p.productId)}
-                    className="text-red-600 hover:text-red-800 font-bold"
-                    aria-label={`Видалити продукт ${p.name}`}
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <SelectedProducts 
+            selectedProducts={selectedProducts} 
+            action={"edit"}
+            updateWeight={updateWeight}
+            removeProduct={removeProduct}
+          />
         )}
 
         <button
