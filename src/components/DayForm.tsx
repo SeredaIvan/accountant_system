@@ -41,7 +41,7 @@ export function DayForm() {
   return (
     <div className="max-w-lg mx-auto p-4 bg-white rounded-md shadow-md">
       <p className="mb-4 text-lg font-semibold text-gray-700">
-        Дата: {formatDateToDMY(new Date(dayData.date))}
+        Дата: {new Date(dayData.date).toLocaleDateString("uk-UA")}
       </p>
 
       <label htmlFor="countKids" className="block mb-1 font-medium text-gray-600">
@@ -92,12 +92,4 @@ export function DayForm() {
       </div>
     </div>
   );
-
-  function formatDateToDMY(dateInput: string | Date): string {
-    const d = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
-    const day = d.getUTCDate().toString().padStart(2, "0");
-    const month = (d.getUTCMonth() + 1).toString().padStart(2, "0");
-    const year = d.getUTCFullYear();
-    return `${day}-${month}-${year}`;
-  }
 }
