@@ -20,17 +20,9 @@ export async function GET(
   where: {
     date: new Date(year, month-1,day)
   },
-  include: {
-    dishes: {
-      include: {
-        products: {
-          include: {
-            product: true,  
-          },
-        },
-      },
-    },
-  },
+  include:{
+    dishes:true
+  }
   }) as DayWithFullDishes;
 
 

@@ -2,20 +2,19 @@ import { useEffect, useState } from "react";
 import { DishTile } from "./DishTile";
 import { useDishesStore } from "@/stores/dishesStore";
 import { useDaysStore } from "@/stores/daysStore";
-import { Dish } from "@/generated/prisma";
-import { DayWithFullDishes } from "@/types/DayWithFullDishes";
 import { DishWithProducts } from "@/types/DishWithProducts";
+import { DayWithFullDishes } from "@/types/DayWithFullDishes";
 
 export function DayForm() {
-  const dayData:DayWithFullDishes|null = useDaysStore((state) => state.days);
+  const dayData: DayWithFullDishes | null = useDaysStore((state) => state.days);
   const setDayData = useDaysStore((state) => state.setDays);
 
-  const dishes:DishWithProducts[] = useDishesStore((state) => state.dishes);
+  const dishes: DishWithProducts[] = useDishesStore((state) => state.dishes ?? []);
   const setDishes = useDishesStore((state) => state.setDishes);
 
   const [countKids, setCountKids] = useState<number>(dayData?.countKids || 0);
   const [selectedDishId, setSelectedDishId] = useState<string>("");
-  const [selectedDishes, setSelectedDishes] = useState<Dish[]>([]);
+  const [selectedDishes, setSelectedDishes] = useState<DishWithProducts[]>([]);
 
   useEffect(() => {
     if (dayData) {
@@ -23,7 +22,7 @@ export function DayForm() {
       setSelectedDishes(dayData.dishes || []);
     }
   }, [dayData]);
-
+  useEffect(()=>console.log(selectedDishes),[selectedDishes])
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     const selectedDish = dishes.find((d) => d.id === selectedId);

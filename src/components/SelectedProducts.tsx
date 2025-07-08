@@ -12,6 +12,7 @@ export const SelectedProducts = ({
   updateWeight,
   removeProduct,
 }: SelectedProductsProps) => {
+
   return (
     <div>
       <h2 className="font-semibold text-lg mb-2 mt-4">Обрані продукти:</h2>
