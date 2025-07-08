@@ -10,7 +10,6 @@ export async function GET(req: NextRequest) {
             product: true, 
           },
         },
-        days: true, 
       },
     });
 
@@ -18,7 +17,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Немає страв" }, { status: 404 });
     }
     
-    console.log(dishes[10] )
     return NextResponse.json({ dishes }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : error }, { status: 500 });

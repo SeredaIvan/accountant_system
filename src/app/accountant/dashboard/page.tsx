@@ -49,12 +49,13 @@ const DashboardPage = () => {
   async function getDayInfo(day: number, month: number, year: number): Promise<DayWithFullDishes | null> {
 
   setErrors(null);
+  console.log(year,day,month)
   try {
     const res = await fetch(`/api/v1.0/days/${day}-${month}-${year}`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
-    
+    console.log(new Date(year, day , month).toISOString(),)
     if (!res.ok) {
 
       const result = await fetch("/api/v1.0/days", {
@@ -92,7 +93,8 @@ const DashboardPage = () => {
   useEffect(() => {
     async function fetchDay() {
       setLoading(true);
-      const data:DayWithFullDishes|null= await getDayInfo(activeTab+1, today.getMonth() + 1, today.getFullYear());
+      console.log("active" , activeTab)
+      const data:DayWithFullDishes|null= await getDayInfo(activeTab, today.getMonth() + 1, today.getFullYear());
       if(data){
         setDayData(data);
         setLoading(false);
@@ -108,13 +110,13 @@ const DashboardPage = () => {
     fetchDishes();
   },[]);
 
-  useEffect(() => {
+  /*useEffect(() => {
     console.log(dishes)
   }, [dishes]);
     useEffect(() => {
     console.log(dayData)
   }, [dayData]);
-
+*/
   return (
     <div>
       <DaysTabBar tabs={daysArr} activeTab={activeTab} setActiveTab={setActiveTab} />

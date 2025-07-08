@@ -26,7 +26,7 @@ const authOptions: NextAuthOptions = {
         },
       },
       async authorize(credentials, req) {
-  console.log("Authorize called with:", credentials);
+
   if (!credentials) return null;
 
   const { phone, password } = credentials;
@@ -44,7 +44,6 @@ const authOptions: NextAuthOptions = {
     return null;
   }
 
-  console.log("Authorize success:", user);
 
   return {
     id: user.id,
@@ -64,7 +63,6 @@ const authOptions: NextAuthOptions = {
         token.name = user.name;
         token.role=user.role;
       }
-      console.log("JWT callback token:", token);
       return token;
     },
     async session({ session, token }) {
@@ -74,7 +72,6 @@ const authOptions: NextAuthOptions = {
         session.user.name = token.name as string;
         session.user.role = token.role as string
       }
-      console.log("Session callback session:", session);
       return session;
     },
   },
