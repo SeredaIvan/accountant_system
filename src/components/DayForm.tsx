@@ -5,7 +5,10 @@ import { useDaysStore } from "@/stores/daysStore";
 import { DishWithProducts } from "@/types/DishWithProducts";
 import { DayWithFullDishes } from "@/types/DayWithFullDishes";
 
+
+
 export function DayForm() {
+
   const dayData: DayWithFullDishes | null = useDaysStore((state) => state.days);
   const setDayData = useDaysStore((state) => state.setDays);
 
@@ -22,7 +25,9 @@ export function DayForm() {
       setSelectedDishes(dayData.dishes || []);
     }
   }, [dayData]);
-  useEffect(()=>console.log(selectedDishes),[selectedDishes])
+
+  useEffect(()=>console.log( "Selected dishes" , selectedDishes ),[selectedDishes])
+
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     const selectedDish = dishes.find((d) => d.id === selectedId);

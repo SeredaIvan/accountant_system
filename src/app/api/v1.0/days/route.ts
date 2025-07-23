@@ -17,12 +17,8 @@ export async function PATCH(req: NextRequest) {
       where: { id },
       data: {
         date: new Date(date),
-        countKids,
-        dishes: {
-          set: dishes.map(d => ({ id: d.id })),
-        },
+        countKids
       },
-      include: { dishes: true },
     });
 
     return NextResponse.json({ dayData }, { status: 200 });
@@ -39,12 +35,8 @@ export async function POST(req: NextRequest) {
     const dayData = await prisma.day.create({
       data: {
         date: new Date(date),
-        countKids,
-        dishes: {
-          connect: dishes.map(d => ({ id: d.id })),
-        },
-      },
-      include: { dishes: true },
+        countKids
+      }
     });
 
     return NextResponse.json({ dayData }, { status: 200 });

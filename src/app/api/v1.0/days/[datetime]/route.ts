@@ -12,7 +12,7 @@ export async function GET(
   console.log(date)
 
   if (!day || !month || !year) {
-    return NextResponse.json({ error: "Невірна дата" }, { status: 400 });
+    return NextResponse.json({ error: "Невірна дата"  }, { status: 400 });
   }
 
   try {
@@ -36,7 +36,7 @@ export async function GET(
     });
 
     if (!dayData) {
-      return NextResponse.json({ error: "Дня не знайдено" }, { status: 404 });
+      return NextResponse.json({ error: "Дня не знайдено",day: date }, { status: 404 });
     }
     console.log(dayData)
     return NextResponse.json({ dayData }, { status: 200 });
