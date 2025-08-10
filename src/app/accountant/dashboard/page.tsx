@@ -2,11 +2,14 @@
 import { DayForm } from "@/components/DayForm";
 import { MessageBox } from "@/components/MessageBox";
 import { DaysTabBar } from "@/components/TabBar";
-import { Day, Dish, DishProduct, Product } from "@/generated/prisma";
 import { DayWithFullDishes } from "@/types/DayWithFullDishes";
 import { useEffect, useState } from "react";
 import { useDishesStore } from "@/stores/dishesStore";
 import { useDaysStore } from "@/stores/daysStore";
+import DatePicker from "react-datepicker";
+
+import "react-datepicker/dist/react-datepicker.css";
+import getAllDishes from "@/fetchers/getAllDishes";
 
 interface DayTab {
   id: number;
@@ -26,24 +29,7 @@ const DashboardPage = () => {
 
   const today = new Date();
   const [activeTab, setActiveTab] = useState<number>(today.getDate());
-
-  async function getDishes() {
-    try {
-      const res = await fetch("/api/v1.0/dishes/get-all", {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setDishes(data.dishes || []);
-      } else {
-        setErrors(["Помилка отримання страв"]);
-      }
-    } catch (error) {
-      console.error(error);
-      setErrors(["Несподівана помилка при завантаженні страв"]);
-    }
-  }
+  const [startDate, setStartDate] = useState<Date>(new Date());  
 
   async function getDayInfo(
     day: number,
@@ -59,7 +45,6 @@ const DashboardPage = () => {
       });
 
       if (!res.ok) {
-        console.log(res.json())
         const result = await fetch("/api/v1.0/days", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -89,6 +74,7 @@ const DashboardPage = () => {
       return null;
     }
   }
+
   const daysArr: DayTab[] = getArrayOfDays();
 
   useEffect(() => {
@@ -110,40 +96,43 @@ const DashboardPage = () => {
 
   useEffect(() => {
     async function fetchDishes() {
-      await getDishes();
+       return await getAllDishes();
     }
-    fetchDishes();
+    const res = fetchDishes();
+    setErrors(["Несподівана помилка при завантаженні страв"]);
   }, []);
 
-  /*useEffect(() => {
-    console.log(dishes)
-  }, [dishes]);
-    useEffect(() => {
-    console.log(dayData)
-  }, [dayData]);
-*/
   return (
     <div>
-      <DaysTabBar
-        tabs={daysArr}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
+      <div>
+        <DaysTabBar
+          tabs={daysArr}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+
+        {errors && <MessageBox messages={errors} type="error" />}
+
+        {/* Вміст активної вкладки */}
+        {loading ? (
+          <p>Завантаження...</p>
+        ) : dayData && dishes ? (
+          <div>
+            <DayForm />
+          </div>
+        ) : (
+          daysArr.find((tab) => tab.id === activeTab)?.content
+        )}
+      </div>
+      <DatePicker
+        selected={startDate}
+        onChange={(date:Date|null) => date && setStartDate(date)}
+        locale="uk"
       />
-
-      {errors && <MessageBox messages={errors} type="error" />}
-
-      {/* Вміст активної вкладки */}
-      {loading ? (
-        <p>Завантаження...</p>
-      ) : dayData && dishes ? (
-        <div>
-          <DayForm />
-        </div>
-      ) : (
-        daysArr.find((tab) => tab.id === activeTab)?.content
-      )}
+      ;
     </div>
   );
+
   function getArrayOfDays() {
     const days = daysInMonth(today.getFullYear(), today.getMonth());
     return Array.from({ length: days }, (_, i) => ({
@@ -165,7 +154,6 @@ const DashboardPage = () => {
       return ["Unknown error"];
     }
   }
-
   function daysInMonth(year: number, month: number): number {
     return new Date(year, month + 1, 0).getDate();
   }

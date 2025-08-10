@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prismaClient";
 import { NextRequest, NextResponse } from "next/server";
+import z from "zod"
 
 type ProductWeight = {
   productId: string;
@@ -19,8 +20,10 @@ export async function POST(req: NextRequest) {
     }
 
     for (const p of products) {
+      const result = z.number().min(0,"Всі продукти повинні мати вагу більше 0")
+      
       if (!p.productId || typeof p.weight !== "number" || p.weight <= 0) {
-        return NextResponse.json({ error: "Всі продукти повинні мати вагу більше 0" }, { status: 400 });
+        return NextResponse.json({ error:""  }, { status: 400 });
       }
     }
 

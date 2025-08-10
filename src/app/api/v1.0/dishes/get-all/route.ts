@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prismaClient";
+import { DishWithProducts } from "@/types/DishWithProducts";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -11,7 +12,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-    });
+    }) as DishWithProducts[];
 
     if (!dishes || dishes.length === 0) {
       return NextResponse.json({ error: "Немає страв" }, { status: 404 });
