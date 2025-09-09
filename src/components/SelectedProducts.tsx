@@ -1,4 +1,5 @@
 import { DishWithProducts } from "@/types/DishWithProducts";
+import { Product } from "@/types/Product";
 
 type SelectedProductsProps = {
   dish: DishWithProducts;
@@ -13,12 +14,14 @@ export const SelectedProducts = ({
   updateWeight,
   removeProduct,
 }: SelectedProductsProps) => {
+  const products =dish.products.map((p)=>p.productId )
+  //DEGUB PRODUCTS
   return (
     <div>
       <h2 className="font-semibold text-lg mb-2 mt-4">Обрані продукти:</h2>
       <ul className="space-y-3">
-        {dish.products.map((p) => (
-          <li key={p.productId} className="flex items-center gap-3">
+        {products.map((p) => (
+          <li key={p.id} className="flex items-center gap-3">
             <span className="flex-1">{p.name}</span>
 
             {action === "edit" ? (

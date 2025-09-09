@@ -26,6 +26,7 @@ export function DayForm() {
       setSelectedDishes(dayData.dayDishes || []);
     }
   }, [dayData]);
+  
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;

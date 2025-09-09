@@ -99,12 +99,6 @@ const DashboardPage = () => {
           daysArr.find((tab) => tab.id === activeTab)?.content
         )}
       </div>
-      {/*<DatePicker
-        selected={startDate}
-        onChange={(date: Date | null) => date && setStartDate(date)}
-        locale="uk"
-      />
-      ;*/}
     </div>
   );
 
