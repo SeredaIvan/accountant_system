@@ -1,10 +1,10 @@
 
-import { DayWithFullDishes } from "@/types/DayWithFullDishes";
+import { DayWithDishes } from "@/types/DayWithDishes";
 import { create } from "zustand";
 
 interface DaysStore {
-  days : DayWithFullDishes | null
-  setDays: (days: DayWithFullDishes) => void;
+  days : DayWithDishes | null
+  setDays: (days: DayWithDishes) => void;
 }
 
 export const useDaysStore = create<DaysStore>((set) => ({
