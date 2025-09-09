@@ -1,23 +1,23 @@
+import { DishWithProducts } from "@/types/DishWithProducts";
 
 type SelectedProductsProps = {
-  selectedProducts: SelectedProduct[];
+  dish: DishWithProducts;
   action: "view" | "edit";
   updateWeight?: (productId: string, weight: number | "") => void;
   removeProduct?: (productId: string) => void;
 };
 
 export const SelectedProducts = ({
-  selectedProducts,
+  dish,
   action,
   updateWeight,
   removeProduct,
 }: SelectedProductsProps) => {
-
   return (
     <div>
       <h2 className="font-semibold text-lg mb-2 mt-4">Обрані продукти:</h2>
       <ul className="space-y-3">
-        {selectedProducts.map((p) => (
+        {dish.products.map((p) => (
           <li key={p.productId} className="flex items-center gap-3">
             <span className="flex-1">{p.name}</span>
 
@@ -50,6 +50,5 @@ export const SelectedProducts = ({
       </ul>
     </div>
   );
-
-}
-export default SelectedProducts
+};
+export default SelectedProducts;

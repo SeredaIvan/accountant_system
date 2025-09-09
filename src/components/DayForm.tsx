@@ -3,36 +3,45 @@ import { DishTile } from "./DishTile";
 import { useDishesStore } from "@/stores/dishesStore";
 import { useDaysStore } from "@/stores/daysStore";
 import { DishWithProducts } from "@/types/DishWithProducts";
-import { DayWithFullDishes } from "@/types/DayWithFullDishes";
-
-
+import { DayWithDishes } from "@/types/DayWithDishes";
+import { DayDishType } from "@/types/DayWithDishes";
+import SelectedDishes from "./SelectedDishes";
 
 export function DayForm() {
-
-  const dayData: DayWithFullDishes | null = useDaysStore((state) => state.days);
+  const dayData: DayWithDishes | null = useDaysStore((state) => state.days);
   const setDayData = useDaysStore((state) => state.setDays);
 
-  const dishes: DishWithProducts[] = useDishesStore((state) => state.dishes ?? []);
-  const setDishes = useDishesStore((state) => state.setDishes);
+  const dishes: DishWithProducts[] = useDishesStore(
+    (state) => state.dishes ?? []
+  );
+
 
   const [countKids, setCountKids] = useState<number>(dayData?.countKids || 0);
   const [selectedDishId, setSelectedDishId] = useState<string>("");
-  const [selectedDishes, setSelectedDishes] = useState<DishWithProducts[]>([]);
+  const [selectedDishes, setSelectedDishes] = useState<DayDishType[]>([]);
 
   useEffect(() => {
     if (dayData) {
       setCountKids(dayData.countKids || 0);
-      setSelectedDishes(dayData.dishes || []);
+      setSelectedDishes(dayData.dayDishes || []);
     }
   }, [dayData]);
-
-  useEffect(()=>console.log( "Selected dishes" , selectedDishes ),[selectedDishes])
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     const selectedDish = dishes.find((d) => d.id === selectedId);
-    if (selectedDish && !selectedDishes.find((d) => d.id === selectedDish.id)) {
-      setSelectedDishes((prev) => [...prev, selectedDish]);
+    if (dayData && selectedDish) {
+      const selectedDayDish: DayDishType = {
+        id: selectedId,
+        dayId: dayData.id,
+        dishId: selectedDish.id,
+      };
+      if (
+        selectedDish &&
+        !selectedDishes.find((d) => d.id === selectedDish.id)
+      ) {
+        setSelectedDishes((prev) => [...prev, selectedDayDish]);
+      }
     }
     setSelectedDishId("");
   };
@@ -41,7 +50,7 @@ export function DayForm() {
     (d) => !selectedDishes.find((sd) => sd.id === d.id)
   );
 
-  if (!dayData) return null;
+  if (!dayData) return <></>;
 
   return (
     <div className="max-w-lg mx-auto p-4 bg-white rounded-md shadow-md">
@@ -49,7 +58,10 @@ export function DayForm() {
         Дата: {new Date(dayData.date).toLocaleDateString("uk-UA")}
       </p>
 
-      <label htmlFor="countKids" className="block mb-1 font-medium text-gray-600">
+      <label
+        htmlFor="countKids"
+        className="block mb-1 font-medium text-gray-600"
+      >
         Кількість дітей:
       </label>
       <input
@@ -64,7 +76,10 @@ export function DayForm() {
       />
 
       <div className="mb-6">
-        <label htmlFor="dishSelect" className="block mb-1 font-medium text-gray-600">
+        <label
+          htmlFor="dishSelect"
+          className="block mb-1 font-medium text-gray-600"
+        >
           Додати страву:
         </label>
         <select
@@ -83,18 +98,8 @@ export function DayForm() {
           ))}
         </select>
       </div>
-
-      <div>
-        <h3 className="mb-2 text-xl font-semibold text-gray-700">Обрані страви:</h3>
-        <div className="border rounded-md divide-y divide-gray-200 overflow-hidden shadow-sm">
-          {selectedDishes.length === 0 && (
-            <p className="p-4 text-gray-500 text-center">Страви не обрано</p>
-          )}
-          {selectedDishes.map((dish) => (
-            <DishTile key={dish.id} dish={dish} />
-          ))}
-        </div>
-      </div>
+      <SelectedDishes selectedDishes={selectedDishes}/>
+      
     </div>
   );
 }

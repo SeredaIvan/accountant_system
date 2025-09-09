@@ -2,14 +2,20 @@
 import { DayForm } from "@/components/DayForm";
 import { MessageBox } from "@/components/MessageBox";
 import { DaysTabBar } from "@/components/TabBar";
-import { DayWithFullDishes } from "@/types/DayWithFullDishes";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useContext } from "react";
+/* STORES */
 import { useDishesStore } from "@/stores/dishesStore";
 import { useDaysStore } from "@/stores/daysStore";
+/* DATEPICKER */
 import DatePicker from "react-datepicker";
-
 import "react-datepicker/dist/react-datepicker.css";
+/* FETCHERS */
 import getAllDishes from "@/fetchers/getAllDishes";
+import getDayInfo from "@/fetchers/getDayInfo";
+import { DayWithDishes } from "@/types/DayWithDishes";
+/* ErrorsContext */
+import ErrorContext from "@/contexts/ErrorContext";
 
 interface DayTab {
   id: number;
@@ -18,7 +24,8 @@ interface DayTab {
 }
 
 const DashboardPage = () => {
-  const [errors, setErrors] = useState<string[] | null>(null);
+  const { errors, setErrors } = useContext(ErrorContext);
+
   const [loading, setLoading] = useState<boolean>(false);
 
   const dayData = useDaysStore((state) => state.days);
@@ -29,77 +36,45 @@ const DashboardPage = () => {
 
   const today = new Date();
   const [activeTab, setActiveTab] = useState<number>(today.getDate());
-  const [startDate, setStartDate] = useState<Date>(new Date());  
-
-  async function getDayInfo(
-    day: number,
-    month: number,
-    year: number
-  ): Promise<DayWithFullDishes | null> {
-    setErrors(null);
-
-    try {
-      const res = await fetch(`/api/v1.0/days/${day}-${month}-${year}`, {
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!res.ok) {
-        const result = await fetch("/api/v1.0/days", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            date: new Date(year, month - 1, day).toISOString(),
-            countKids: 0,
-            dishes: [],
-          }),
-        });
-
-        if (!result.ok) {
-          setErrors((prev) => [...(prev ?? []), "Помилка створення дня"]);
-          return null;
-        }
-
-        const createdData = await result.json();
-        return createdData.dayData ?? null;
-      }
-      const data = await res.json();
-
-      if (data.error) {
-        setErrors(normalizeErrors(data.error));
-      }
-      return data.dayData ?? null;
-    } catch (e) {
-      setErrors(["Несподівана помилка"]);
-      return null;
-    }
-  }
+  const [startDate, setStartDate] = useState<Date>(new Date());
 
   const daysArr: DayTab[] = getArrayOfDays();
 
   useEffect(() => {
     async function fetchDay() {
       setLoading(true);
+      setErrors(null);
 
-      const data: DayWithFullDishes | null = await getDayInfo(
+      const data = await getDayInfo(
         activeTab,
         today.getMonth() + 1,
         today.getFullYear()
       );
-      if (data) {
+
+      if ("error" in data) {
+        setErrors((prev) => [...(prev ?? []), ...normalizeErrors(data.error)]);
+      } else {
         setDayData(data);
-        setLoading(false);
+        console.log(data)
       }
+      setLoading(false);
     }
+
     fetchDay();
   }, [activeTab]);
 
   useEffect(() => {
-    async function fetchDishes() {
-       return await getAllDishes();
-    }
-    const res = fetchDishes();
-    setErrors(["Несподівана помилка при завантаженні страв"]);
+    (async()=>{const data = await getAllDishes()
+      setLoading(true)
+      if("error" in data){
+        setErrors(["Несподівана помилка при завантаженні страв"]);
+        setLoading(false)
+      } 
+      else{
+        setDishes(dishes)
+        setLoading(false)
+      }
+    })()
   }, []);
 
   return (
@@ -124,17 +99,17 @@ const DashboardPage = () => {
           daysArr.find((tab) => tab.id === activeTab)?.content
         )}
       </div>
-      <DatePicker
+      {/*<DatePicker
         selected={startDate}
-        onChange={(date:Date|null) => date && setStartDate(date)}
+        onChange={(date: Date | null) => date && setStartDate(date)}
         locale="uk"
       />
-      ;
+      ;*/}
     </div>
   );
 
   function getArrayOfDays() {
-    const days = daysInMonth(today.getFullYear(), today.getMonth());
+    const days = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
     return Array.from({ length: days }, (_, i) => ({
       id: i + 1,
       label: String(i + 1),
@@ -153,9 +128,6 @@ const DashboardPage = () => {
     } catch {
       return ["Unknown error"];
     }
-  }
-  function daysInMonth(year: number, month: number): number {
-    return new Date(year, month + 1, 0).getDate();
   }
 };
 

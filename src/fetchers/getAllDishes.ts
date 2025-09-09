@@ -1,6 +1,6 @@
 import { DishWithProducts } from "@/types/DishWithProducts";
 
-export default async function getAllDishes() {
+export default async function getAllDishes():Promise<DishWithProducts[]|{error:string}> {
     try {
       const res = await fetch("http://localhost:3000/api/v1.0/dishes/get-all", {
         method: "GET",
@@ -8,12 +8,11 @@ export default async function getAllDishes() {
       });
       if (res.ok) {
         const data = await res.json();
-        console.log(data.dishes)
         return data.dishes as DishWithProducts[];
       } else {
         return {error : "Помилка отримання страв"};
       }
     } catch (error) {
-      return {error :error}
+      return {error :"Несподівана помилка"}
     }
   }
