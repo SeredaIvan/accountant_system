@@ -7,15 +7,19 @@ import { useEffect, useState, useContext } from "react";
 /* STORES */
 import { useDishesStore } from "@/stores/dishesStore";
 import { useDaysStore } from "@/stores/daysStore";
+import { useProductsStore } from "@/stores/productsStore";
 /* DATEPICKER */
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 /* FETCHERS */
 import getAllDishes from "@/fetchers/getAllDishes";
 import getDayInfo from "@/fetchers/getDayInfo";
-import { DayWithDishes } from "@/types/DayWithDishes";
+/* TYPES */
+import { DishWithProducts } from "@/types/DishWithProducts";
+import { Product } from "@/types/Product";
 /* ErrorsContext */
 import ErrorContext from "@/contexts/ErrorContext";
+import getAllProducts from "@/fetchers/getAllProducts";
 
 interface DayTab {
   id: number;
@@ -33,6 +37,8 @@ const DashboardPage = () => {
 
   const dishes = useDishesStore((state) => state.dishes);
   const setDishes = useDishesStore((state) => state.setDishes);
+
+  const setProducts = useProductsStore((state) => state.setProducts);
 
   const today = new Date();
   const [activeTab, setActiveTab] = useState<number>(today.getDate());
@@ -55,26 +61,38 @@ const DashboardPage = () => {
         setErrors((prev) => [...(prev ?? []), ...normalizeErrors(data.error)]);
       } else {
         setDayData(data);
-        console.log(data)
       }
       setLoading(false);
     }
 
     fetchDay();
   }, [activeTab]);
-
-  useEffect(() => {
-    (async()=>{const data = await getAllDishes()
-      setLoading(true)
-      if("error" in data){
-        setErrors(["Несподівана помилка при завантаженні страв"]);
-        setLoading(false)
-      } 
-      else{
-        setDishes(dishes)
-        setLoading(false)
+  /*fetch all products*/
+  useEffect(()=>{(async()=>{
+    const products:Product[]|{error:string} = await getAllProducts()
+    console.log("fetching")
+    if ("error" in products) {
+        setErrors((prev) => [...(prev ?? []), ...normalizeErrors(products.error)]);
+        setLoading(false);
+      } else {
+        setProducts(products);
+        setLoading(false);
       }
-    })()
+      console.log(products)
+  })()},[])
+  /*fetch all dishes with products*/
+  useEffect(() => {
+    (async () => {
+      const dishes:DishWithProducts[]|{error:string} = await getAllDishes();
+      setLoading(true);
+      if ("error" in dishes) {
+        setErrors((prev) => [...(prev ?? []), ...normalizeErrors(dishes.error)]);
+        setLoading(false);
+      } else {
+        setDishes(dishes);
+        setLoading(false);
+      }
+    })();
   }, []);
 
   return (
@@ -103,7 +121,11 @@ const DashboardPage = () => {
   );
 
   function getArrayOfDays() {
-    const days = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    const days = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0
+    ).getDate();
     return Array.from({ length: days }, (_, i) => ({
       id: i + 1,
       label: String(i + 1),

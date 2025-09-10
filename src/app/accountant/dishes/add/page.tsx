@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { MessageBox } from "@/components/MessageBox";
 import SelectedProducts from "@/components/SelectedProducts";
 
+import { SelectedProduct } from "@/types/SelectedProducts";
+
 type Product = {
   id: string;
   name: string;
@@ -75,7 +77,7 @@ const DishesAdd = () => {
       return;
     }
     for (const p of selectedProducts) {
-      if (p.weight === "" || p.weight <= 0) {
+      if (!p.weight || Number(p.weight) <= 0||p.weight==="") {
         setErrorMessages([`Вага для продукту "${p.name}" має бути більшою за 0`]);
         return;
       }
