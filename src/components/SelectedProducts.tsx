@@ -40,9 +40,6 @@ export const SelectedProducts = ({
     const dishProducts = new Map<string, DishProduct>(
       dish.products.map((p) => [`${p.productId}`, p])
     );
-    console.log("filteredProducts",filteredProducts)
-    console.log("dishProducts",dishProducts)
-    console.log("storedProducts",storedProducts)
     return (
       <div>
         <h2 className="font-semibold text-lg mb-2 mt-4">Обрані продукти:</h2>

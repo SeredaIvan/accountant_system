@@ -9,7 +9,6 @@ import SelectedDishes from "./SelectedDishes";
 
 export function DayForm() {
   const dayData: DayWithDishes | null = useDaysStore((state) => state.days);
-  const setDayData = useDaysStore((state) => state.setDays);
 
   const dishes: DishWithProducts[] = useDishesStore(
     (state) => state.dishes ?? []

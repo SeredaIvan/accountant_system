@@ -42,7 +42,6 @@ const DashboardPage = () => {
 
   const today = new Date();
   const [activeTab, setActiveTab] = useState<number>(today.getDate());
-  const [startDate, setStartDate] = useState<Date>(new Date());
 
   const daysArr: DayTab[] = getArrayOfDays();
 
@@ -70,7 +69,6 @@ const DashboardPage = () => {
   /*fetch all products*/
   useEffect(()=>{(async()=>{
     const products:Product[]|{error:string} = await getAllProducts()
-    console.log("fetching")
     if ("error" in products) {
         setErrors((prev) => [...(prev ?? []), ...normalizeErrors(products.error)]);
         setLoading(false);
@@ -78,7 +76,6 @@ const DashboardPage = () => {
         setProducts(products);
         setLoading(false);
       }
-      console.log(products)
   })()},[])
   /*fetch all dishes with products*/
   useEffect(() => {
@@ -108,7 +105,7 @@ const DashboardPage = () => {
 
         {/* Вміст активної вкладки */}
         {loading ? (
-          <p>Завантаження...</p>
+          <p className="text-center mt-3">Завантаження...</p>
         ) : dayData && dishes ? (
           <div>
             <DayForm />
