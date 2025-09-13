@@ -5,25 +5,14 @@ import { DishTile } from "./DishTile";
 import React, { useState, useEffect, useCallback } from "react";
 
 type SelectedDishesProps = {
-  selectedDishes: DayDishType[];
+  selectedDishes: Set<string>;
+  handleRemoveSelectedDish:(id:string)=>void
 };
-function SelectedDishes({ selectedDishes }: SelectedDishesProps) {
-  const [selectedDishesSet, setSelectedDishesSet] = useState<Set<string>>(
-    new Set(selectedDishes.map((dish) => dish.id))
-  );
+function SelectedDishes({ selectedDishes ,handleRemoveSelectedDish}: SelectedDishesProps) {
+  
   const dishes: DishWithProducts[] = useDishesStore(
     (state) => state.dishes ?? []
   );
-  const handleRemoveSelectedDish = useCallback((id: string) => {
-    setSelectedDishesSet((prev) => {
-      const newSet = new Set(prev);
-      newSet.delete(id);
-      return newSet;
-    });
-  }, []);
-  useEffect(() => {
-    setSelectedDishesSet(new Set(selectedDishes.map((dish) => dish.id)));
-  }, [selectedDishes]);
 
   return (
     <div>
@@ -31,11 +20,11 @@ function SelectedDishes({ selectedDishes }: SelectedDishesProps) {
         Обрані страви:
       </h3>
       <div className="border rounded-md divide-y divide-gray-200 overflow-hidden shadow-sm">
-        {selectedDishes.length === 0 && (
+        {selectedDishes.size === 0 && (
           <p className="p-4 text-gray-500 text-center">Страви не обрано</p>
         )}
         {dishes.map((dish) =>
-          selectedDishesSet.has(dish.id) ? (
+          selectedDishes.has(dish.id) ? (
             <DishTile
               key={dish.id}
               dish={dish}
