@@ -1,10 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import { DishTile } from "./DishTile";
 import { useDishesStore } from "@/stores/dishesStore";
 import { useDaysStore } from "@/stores/daysStore";
 import { DishWithProducts } from "@/types/DishWithProducts";
 import { DayWithDishes } from "@/types/DayWithDishes";
-import { DayDishType } from "@/types/DayWithDishes";
 import SelectedDishes from "./SelectedDishes";
 
 export function DayForm() {

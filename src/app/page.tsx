@@ -1,6 +1,5 @@
 
 import authOptions from "@/configs/nextAuthConfig";
-import getAllDishes from "@/fetchers/getAllDishes";
 import { getServerSession } from "next-auth";
 
 
